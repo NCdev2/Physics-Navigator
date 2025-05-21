@@ -10,27 +10,41 @@
         body {
             font-family: 'Inter', sans-serif; /* Assuming Inter is available or falls back to sans-serif */
         }
+        /* Responsive content card border and padding */
         .content-section {
             display: none;
+            border: 1.5px solid #e0e7ef; /* subtle border for all screens */
+            border-radius: 1.25rem; /* rounded-2xl */
+            box-shadow: 0 2px 16px 0 rgba(2,132,199,0.08), 0 1.5px 4px 0 rgba(2,132,199,0.04);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         .content-section.active {
             display: block;
         }
-        .nav-item.active-topic > button {
-            background-color: #0369a1; /* sky-700 for active main topic */
-            color: white;
+        @media (min-width: 640px) {
+            .content-section {
+                padding: 2.5rem;
+                margin-bottom: 2rem;
+            }
         }
-         .nav-item .sub-nav-item.active-subtopic button {
-            background-color: #0ea5e9; /* sky-500 for active sub-topic */
-            color: white;
-            font-weight: 600;
+        @media (max-width: 639px) {
+            .content-section {
+                padding: 1rem;
+                border-radius: 0.75rem;
+                margin-bottom: 1rem;
+            }
         }
-        .sub-nav {
-            display: none;
+        /* Responsive nav and main layout */
+        nav {
+            border-radius: 0 0 1.5rem 1.5rem;
         }
-        .nav-item.active-topic .sub-nav {
-            display: block;
+        @media (min-width: 768px) {
+            nav {
+                border-radius: 0;
+            }
         }
+        /* Responsive chart container */
         .chart-container {
             position: relative;
             width: 100%;
@@ -239,6 +253,8 @@
         };
 
         function displayContent(mainTopicKey, subTopicKey) {
+            // Store the current selection in the URL hash for navigation
+            window.location.hash = `#${encodeURIComponent(mainTopicKey)}-${encodeURIComponent(subTopicKey)}`;
             const allContentSections = contentArea.querySelectorAll('.content-section');
             allContentSections.forEach(section => section.classList.remove('active'));
 
@@ -442,6 +458,27 @@
                     legend: {
                         display: false 
                     }
+                }
+            }
+        });
+
+        // Handle navigation by hash (for new page effect)
+        window.addEventListener('DOMContentLoaded', () => {
+            // If there is a hash, show the corresponding section
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1);
+                const [main, ...subArr] = hash.split('-');
+                const mainTopicKey = decodeURIComponent(main);
+                const subTopicKey = decodeURIComponent(subArr.join('-'));
+                if (physicsData[mainTopicKey] && physicsData[mainTopicKey].subsections && physicsData[mainTopicKey].subsections[subTopicKey]) {
+                    displayContent(mainTopicKey, subTopicKey);
+                    // Expand the main topic if not already
+                    const navItems = document.querySelectorAll('.nav-item');
+                    navItems.forEach(item => {
+                        if (item.textContent.includes(mainTopicKey)) {
+                            item.classList.add('active-topic');
+                        }
+                    });
                 }
             }
         });
